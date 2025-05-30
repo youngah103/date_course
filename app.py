@@ -460,9 +460,6 @@ if prompt := st.chat_input("데이트 코스를 추천해드릴게요! 어떤 �
     # 날짜와 시간 추출
     date_str, time_str = extract_date_time(prompt)
     
-    # 날씨 정보 가져오기
-    weather_info = get_weather_info(date_str, time_str)
-    
     # Gemini 모델에 전송할 프롬프트 구성
     if st.session_state.last_recommendations and any(keyword in prompt.lower() for keyword in ["바꿔", "교체", "다른", "비싸", "너무", "별로"]):
         # 피드백 처리를 위한 프롬프트
@@ -487,16 +484,13 @@ if prompt := st.chat_input("데이트 코스를 추천해드릴게요! 어떤 �
     # 네이버 지도 링크 업데이트
     response_with_links = update_place_links(response.text)
     
-    # 별점 정보 업데이트
-    updated_response = update_place_ratings(response_with_links)
-    
     # 어시스턴트 응답 표시
     with st.chat_message("assistant"):
-        st.markdown(updated_response)
+        st.markdown(response_with_links)
         
         # 시간표 생성 및 표시
         st.markdown("\n### 📅 예상 시간표")
-        timeline = create_timeline(updated_response, time_str)
+        timeline = create_timeline(response_with_links, time_str)
         st.markdown(timeline)
         
         # 시간표 아래에 참고 사항 추가
@@ -507,8 +501,8 @@ if prompt := st.chat_input("데이트 코스를 추천해드릴게요! 어떤 �
         """)
     
     # 응답 저장
-    st.session_state.messages.append({"role": "assistant", "content": updated_response + "\n\n### 📅 예상 시간표\n" + timeline})
-    st.session_state.last_recommendations = updated_response
+    st.session_state.messages.append({"role": "assistant", "content": response_with_links + "\n\n### 📅 예상 시간표\n" + timeline})
+    st.session_state.last_recommendations = response_with_links
 
 # 버튼 컨테이너를 대화 맨 아래에 배치
 if st.session_state.messages:  # 대화가 있을 때만 버튼들 표시
